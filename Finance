@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Financière DRAME ÉLECTRONIQUE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Logo DRAME ÉLECTRONIQUE">
+        </div>
+        <div class="company-info">
+            <h1>DRAME ÉLECTRONIQUE</h1>
+            <p>Grand marché de Bamako, rue Nolly, non loin de la mosquée Yacouba Guindo</p>
+            <p>Téléphone : +223 70762131 / +223 75090055 | Email : Ousmanedrame460@gmail.com</p>
+        </div>
+        <nav>
+            <button onclick="showSection('dashboard')">Tableau de Bord</button>
+            <button onclick="showSection('clients')">Clients</button>
+            <button onclick="showSection('fournisseurs')">Fournisseurs</button>
+            <button onclick="showSection('factures')">Factures</button>
+            <button onclick="showSection('depenses')">Dépenses</button>
+            <button onclick="showSection('rapports')">Rapports</button>
+        </nav>
+    </header>
+    <main>
+        <section id="dashboard" class="active">
+            <h2>Bienvenue dans votre tableau de bord</h2>
+        </section>
+        <section id="clients">
+            <h2>Gestion des Clients</h2>
+            <input type="text" id="clientName" placeholder="Nom du client">
+            <button onclick="addClient()">Ajouter Client</button>
+            <ul id="clientList"></ul>
+        </section>
+        <section id="fournisseurs">
+            <h2>Gestion des Fournisseurs</h2>
+            <input type="text" id="fournisseurName" placeholder="Nom du fournisseur">
+            <button onclick="addFournisseur()">Ajouter Fournisseur</button>
+            <ul id="fournisseurList"></ul>
+        </section>
+        <section id="factures">
+            <h2>Factures</h2>
+            <input type="text" id="factureDesc" placeholder="Description">
+            <input type="number" id="factureMontant" placeholder="Montant">
+            <button onclick="addFacture()">Ajouter Facture</button>
+            <ul id="factureList"></ul>
+        </section>
+        <section id="depenses">
+            <h2>Dépenses</h2>
+            <input type="text" id="depenseDesc" placeholder="Description">
+            <input type="number" id="depenseMontant" placeholder="Montant">
+            <button onclick="addDepense()">Ajouter Dépense</button>
+            <ul id="depenseList"></ul>
+        </section>
+        <section id="rapports">
+            <h2>Rapports</h2>
+            <p>Total Factures: <span id="totalFactures">0</span> €</p>
+            <p>Total Dépenses: <span id="totalDepenses">0</span> €</p>
+            <p>Bénéfice Net: <span id="beneficeNet">0</span> €</p>
+        </section>
+    </main>
+    <button onclick="resetDonnees()" style="position:fixed;bottom:20px;right:20px;background:red;color:white;padding:10px;border:none;border-radius:5px;cursor:pointer;">🗑 Effacer toutes les données</button>
+    <script src="script.js"></script>
+</body>
+</html>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
+header { background:#2c3e50; color:white; padding:10px; text-align:center; }
+header .logo img { max-width:100px; display:block; margin:0 auto; }
+header .company-info { margin:10px 0; }
+nav button { margin:5px; padding:10px; border:none; background:#3498db; color:white; cursor:pointer; }
+section { display:none; padding:20px; background:white; margin:20px; border-radius:5px; }
+section.active { display:block; }
+function showSection(id) {
+    document.querySelectorAll('main section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+let clients=[], fournisseurs=[], factures=[], depenses=[];
+
+function addClient(){ 
+    let name=document.getElementById('clientName').value; 
+    if(name){clients.push(name); updateList('clientList', clients); document.getElementById('clientName').value='';}
+}
+
+function addFournisseur(){ 
+    let name=document.getElementById('fournisseurName').value; 
+    if(name){fournisseurs.push(name); updateList('fournisseurList', fournisseurs); document.getElementById('fournisseurName').value='';}
+}
+
+function addFacture(){ 
+    let desc=document.getElementById('factureDesc').value; 
+    let montant=parseFloat(document.getElementById('factureMontant').value); 
+    if(desc && !isNaN(montant)){factures.push({desc,montant}); updateFactures(); document.getElementById('factureDesc').value=''; document.getElementById('factureMontant').value='';}
+}
+
+function addDepense(){ 
+    let desc=document.getElementById('depenseDesc').value; 
+    let montant=parseFloat(document.getElementById('depenseMontant').value); 
+    if(desc && !isNaN(montant)){depenses.push({desc,montant}); updateDepenses(); document.getElementById('depenseDesc').value=''; document.getElementById('depenseMontant').value='';}
+}
+
+function updateList(id, arr){ 
+    let ul=document.getElementById(id); ul.innerHTML=''; arr.forEach(el=>{ let li=document.createElement('li'); li.textContent=el; ul.appendChild(li); }); 
+}
+
+function updateFactures(){ 
+    let ul=document.getElementById('factureList'); ul.innerHTML=''; let total=0; 
+    factures.forEach(f=>{ let li=document.createElement('li'); li.textContent=f.desc+' : '+f.montant+' €'; ul.appendChild(li); total+=f.montant; }); 
+    document.getElementById('totalFactures').textContent=total; 
+    updateBenefice();
+}
+
+function updateDepenses(){ 
+    let ul=document.getElementById('depenseList'); ul.innerHTML=''; let total=0; 
+    depenses.forEach(d=>{ let li=document.createElement('li'); li.textContent=d.desc+' : '+d.montant+' €'; ul.appendChild(li); total+=d.montant; }); 
+    document.getElementById('totalDepenses').textContent=total; 
+    updateBenefice();
+}
+
+function updateBenefice(){ 
+    let totalFact=parseFloat(document.getElementById('totalFactures').textContent)||0; 
+    let totalDep=parseFloat(document.getElementById('totalDepenses').textContent)||0; 
+    document.getElementById('beneficeNet').textContent=(totalFact-totalDep);
+}
+
+function resetDonnees(){ 
+    if(confirm('Voulez-vous vraiment tout effacer ?')){
+        clients=[];fournisseurs=[];factures=[];depenses=[]; 
+        updateList('clientList',clients); updateList('fournisseurList',fournisseurs); 
+        updateFactures(); updateDepenses();
+    }
+}
